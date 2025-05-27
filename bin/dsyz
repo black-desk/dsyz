@@ -1,0 +1,253 @@
+#!/usr/bin/env bash
+
+# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-FileCopyrightText: Chen Linxuan <me@black-desk.cn>
+
+# NOTE:
+# Use /usr/bin/env to find shell interpreter for better portability.
+# Reference: https://en.wikipedia.org/wiki/Shebang_%28Unix%29#Portability
+
+# NOTE:
+# Exit immediately if any commands (even in pipeline)
+# exits with a non-zero status.
+set -e
+set -o pipefail
+
+# WARNING:
+# This is not reliable when using POSIX sh
+# and current script file is sourced by `source` or `.`
+CURRENT_SOURCE_FILE_PATH="${BASH_SOURCE[0]:-$0}"
+CURRENT_SOURCE_FILE_NAME="$(basename -- "$CURRENT_SOURCE_FILE_PATH")"
+
+# shellcheck disable=SC2016
+USAGE="$CURRENT_SOURCE_FILE_NAME
+
+Description:
+  Tool to setup and run syzkaller for fuzzing Desktop Linux kernel.
+
+Environment Variables:
+  DSYZ_DEBUG		- Set to any non-empty value to run syzkaller in debug mode
+  DSYZ_WORKDIR		- Working directory for all operations (default: current directory)
+
+  DSYZ_SYZKALLER_REPO	- Git repository URL for syzkaller (default: https://github.com/google/syzkaller.git)
+  DSYZ_KERNEL_REPO	- Git repository URL for Linux kernel (default: https://github.com/torvalds/linux.git)
+  DSYZ_KERNEL_CONFIG_SCRIPT - Optional path to a custom kernel configuration script
+  DSYZ_REBUILD_KERNEL	- Set to any non-empty value to force rebuild the kernel
+  DSYZ_RECREATE_IMAGE	- Set to any non-empty value to force recreate VM disk image
+
+  DSYZ_DISTRIBUTION	- Linux distribution for the VM image (default: bullseye)
+  DSYZ_IMAGE		- Directory to store VM images (default: \$DSYZ_WORKDIR/image)
+
+  DSYZ_LISTEN		- IP address to listen on for HTTP interface (default: 127.0.0.1)
+  DSYZ_PORT		- Port to listen on for HTTP interface (default: 56741)
+  DSYZ_TARGET		- Target architecture for syzkaller (default: linux/amd64)
+  DSYZ_PROCS		- Number of parallel processes for syzkaller (default: 8)
+  DSYZ_VM_COUNT		- Number of virtual machines to run (default: 4)
+  DSYZ_VM_CPU		- Number of CPU cores per virtual machine (default: 2)
+  DSYZ_VM_MEMORY	- Memory in MB per virtual machine (default: 2048)
+
+  DSYZ_GIT		- Path to git executable (default: git)
+  DSYZ_QEMU		- Path to qemu executable (default: qemu-system-$(uname -m))
+
+Usage:
+  $CURRENT_SOURCE_FILE_NAME -h
+  $CURRENT_SOURCE_FILE_NAME
+
+Options:
+  -h	Show this screen."
+
+# This function log messages to stderr works like printf
+# with a prefix of the current script name.
+# Arguments:
+#   $1 - The format string.
+#   $@ - Arguments to the format string, just like printf.
+function log() {
+	local format="$1"
+	shift
+	# shellcheck disable=SC2059
+	printf "$CURRENT_SOURCE_FILE_NAME: $format\n" "$@" >&2 || true
+}
+
+function main() {
+	while getopts ':h' option; do
+		case "$option" in
+		h)
+			echo "$USAGE"
+			exit
+			;;
+		\?)
+			log "[ERROR] Unknown option: -%s" "$OPTARG"
+			exit 1
+			;;
+		esac
+	done
+	shift $((OPTIND - 1))
+
+	log "[INFO] I will help you setup syzkaller for fuzzing your Desktop Linux Kernel."
+
+	DSYZ_WORKDIR="${DSYZ_WORKDIR:-"$(pwd)"}"
+	DSYZ_WORKDIR="$(realpath -- "$DSYZ_WORKDIR")"
+
+	if ! [ -d "$DSYZ_WORKDIR"/syzkaller ]; then
+		log "[INFO] I will install syzkaller to $DSYZ_WORKDIR"
+		pushd "$DSYZ_WORKDIR"
+		DSYZ_SYZKALLER_REPO="${DSYZ_SYZKALLER_REPO:-https://github.com/google/syzkaller.git}"
+
+		DSYZ_GIT="${DSYZ_GIT:-git}"
+		if ! command -v "$DSYZ_GIT" &>/dev/null; then
+			log "[ERROR] git is not installed. Please install git first."
+			exit 1
+		fi
+
+		"$DSYZ_GIT" clone --filter=tree:0 "$DSYZ_SYZKALLER_REPO" syzkaller
+		popd
+	fi
+
+	log "[INFO] Syzkaller source is available at $DSYZ_WORKDIR/syzkaller"
+
+	if [ -n "$DSYZ_REBUILD_SYZKALLER" ] || ! [ -d "$DSYZ_WORKDIR/syzkaller/bin" ]; then
+		pushd "$DSYZ_WORKDIR"/syzkaller
+
+		DSYZ_GO="${DSYZ_GO:-go}"
+		if ! command -v "$DSYZ_GO" &>/dev/null; then
+			log "[ERROR] go is not installed. Please install go first."
+			exit 1
+		fi
+
+		make
+		popd
+	fi
+
+	log "[INFO] Syzkaller is available at $DSYZ_WORKDIR/syzkaller/bin"
+
+	if ! [ -d "$DSYZ_WORKDIR"/linux ]; then
+		log "[INFO] I will clone the Linux kernel source code to $DSYZ_WORKDIR/linux"
+		pushd "$DSYZ_WORKDIR"
+
+		DSYZ_KERNEL_REPO="${DSYZ_KERNEL_REPO:-https://github.com/torvalds/linux.git}"
+
+		DSYZ_GIT="${DSYZ_GIT:-git}"
+		if ! command -v "$DSYZ_GIT" &>/dev/null; then
+			log "[ERROR] git is not installed. Please install git first."
+			exit 1
+		fi
+
+		"$DSYZ_GIT" clone --filter=tree:0 "$DSYZ_KERNEL_REPO" linux
+		popd
+	fi
+
+	log "[INFO] Linux kernel source code is available at $DSYZ_WORKDIR/linux"
+
+	if [ -n "$DSYZ_REBUILD_KERNEL" ] || ! [ -f "$DSYZ_WORKDIR/linux/arch/$(uname -m)/boot/bzImage" ]; then
+		log "[INFO] I will configure the Linux kernel for syzkaller fuzzing."
+
+		if [ -n "$DSYZ_KERNEL_CONFIG_SCRIPT" ]; then
+			if ! [ -f "$DSYZ_KERNEL_CONFIG_SCRIPT" ]; then
+				log "[ERROR] DSYZ_KERNEL_CONFIG_SCRIPT is not a valid file: \"%s\"" \
+					"$DSYZ_KERNEL_CONFIG_SCRIPT"
+				exit 1
+			fi
+
+			DSYZ_KERNEL_CONFIG_SCRIPT="$(realpath -- "$DSYZ_KERNEL_CONFIG_SCRIPT")"
+
+		fi
+
+		pushd "$DSYZ_WORKDIR"/linux
+
+		if [ -n "$DSYZ_KERNEL_CONFIG_SCRIPT" ]; then
+			log "[INFO] Using \"%s\" to configure the kernel." \
+				"$DSYZ_KERNEL_CONFIG_SCRIPT"
+			# shellcheck disable=SC1090
+			source "$DSYZ_KERNEL_CONFIG_SCRIPT"
+		else
+			make defconfig
+			make kvm_guest.config
+
+			./scripts/config --set-val CONFIG_KCOV y
+			./scripts/config --set-val CONFIG_DEBUG_INFO_DWARF4 y
+			./scripts/config --set-val CONFIG_KASAN y
+			./scripts/config --set-val CONFIG_KASAN_INLINE y
+			./scripts/config --set-val CONFIG_CONFIGFS_FS y
+			./scripts/config --set-val CONFIG_SECURITYFS y
+			./scripts/config --set-val CONFIG_CMDLINE_BOOL y
+			./scripts/config --set-str CONFIG_CMDLINE "net.ifnames=0"
+
+			make olddefconfig
+		fi
+
+		log "[INFO] I will build the Linux kernel for fuzzing."
+
+		make -j"$(nproc)"
+
+		popd
+
+	fi
+
+	log "[INFO] Kernel bzImage is available at $DSYZ_WORKDIR/linux/arch/$(uname -m)/boot/bzImage"
+
+	DSYZ_DISTRIBUTION="${DSYZ_DISTRIBUTION:-"bullseye"}"
+	DSYZ_IMAGE="${DSYZ_IMAGE:-"$DSYZ_WORKDIR"/image}"
+
+	if [ -n "$DSYZ_RECREATE_IMAGE" ] || ! [ -f "$DSYZ_IMAGE/$DSYZ_DISTRIBUTION".img ]; then
+		log "[INFO] I will create a disk image for syzkaller fuzzing with $DSYZ_DISTRIBUTION distribution."
+
+		rm -f "$DSYZ_IMAGE/$DSYZ_DISTRIBUTION.img"
+
+		mkdir -p "$DSYZ_IMAGE"
+
+		pushd "$DSYZ_IMAGE"
+
+		cp "$DSYZ_WORKDIR/syzkaller/tools/create-image.sh" create-image.sh
+
+		./create-image.sh --distribution "$DSYZ_DISTRIBUTION"
+
+		popd
+	fi
+
+	log "[INFO] Disk image is available at $DSYZ_IMAGE/$DSYZ_DISTRIBUTION.img"
+
+	DSYZ_LISTEN="${DSYZ_LISTEN:-127.0.0.1}"
+	DSYZ_PORT="${DSYZ_PORT:-56741}"
+	DSYZ_TARGET="${DSYZ_TARGET:-linux/amd64}"
+	DSYZ_PROCS="${DSYZ_PROCS:-8}"
+	DSYZ_VM_COUNT="${DSYZ_VM_COUNT:-4}"
+	DSYZ_VM_CPU="${DSYZ_VM_CPU:-2}"
+	DSYZ_VM_MEMORY="${DSYZ_VM_MEMORY:-2048}"
+
+	cat <<EOF >"$DSYZ_WORKDIR"/syz-manager-config.json
+{
+	"target": "linux/amd64",
+	"http": "$DSYZ_LISTEN:$DSYZ_PORT",
+	"workdir": "$DSYZ_WORKDIR/workdir",
+	"kernel_obj": "$DSYZ_WORKDIR/linux",
+	"image": "$DSYZ_IMAGE/$DSYZ_DISTRIBUTION.img",
+	"sshkey": "$DSYZ_IMAGE/$DSYZ_DISTRIBUTION.id_rsa",
+	"syzkaller": "$DSYZ_WORKDIR/syzkaller",
+	"procs": $DSYZ_PROCS,
+	"type": "qemu",
+	"vm": {
+		"count": $DSYZ_VM_COUNT,
+		"kernel": "$DSYZ_WORKDIR/linux/arch/$(uname -m)/boot/bzImage",
+		"cpu": $DSYZ_VM_CPU,
+		"mem": $DSYZ_VM_MEMORY
+	}
+}
+EOF
+
+	DSYZ_QEMU="${DSYZ_QEMU:-qemu-system-"$(uname -m)"}"
+	if ! command -v "$DSYZ_QEMU" &>/dev/null; then
+		log "[ERROR] qemu is not installed. Please install qemu first."
+		exit 1
+	fi
+
+	mkdir -p "$DSYZ_WORKDIR/workdir"
+
+	if [ -n "$DSYZ_DEBUG" ]; then
+		"$DSYZ_WORKDIR/syzkaller/bin/syz-manager" -debug -config="$DSYZ_WORKDIR/syz-manager-config.json"
+		exit 0
+	fi
+
+	"$DSYZ_WORKDIR/syzkaller/bin/syz-manager" -config="$DSYZ_WORKDIR/syz-manager-config.json"
+}
+
+main "$@"
