@@ -57,6 +57,12 @@ dsyz-deepin
 
 This is a wrapper script that configures dsyz to use the Deepin kernel repository and applies specific configurations for fuzzing the Deepin kernel.
 
+```bash
+dsyz-arch
+```
+
+This is a wrapper script for dsyz to use the Arch Linux kernel repository. It automatically fetches the latest release version and appropriate kernel configuration from the Arch Linux repositories.
+
 ## Configuration
 
 dsyz can be configured using environment variables:

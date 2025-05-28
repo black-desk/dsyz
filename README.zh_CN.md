@@ -63,6 +63,14 @@ env \
 
 这是一个包装脚本，用于配置 dsyz 使用 Deepin 内核仓库，并应用特定配置来模糊测试 Deepin 内核。
 
+```bash
+env \
+  DSYZ_SYZKALLER_REPO="https://gitcode.com/gh_mirrors/sy/syzkaller.git" \
+  dsyz-arch
+```
+
+这是一个包装脚本，用于使用 Arch Linux 内核仓库。它会自动获取最新的发布版本和 Arch Linux 仓库中的适当内核配置。
+
 ## 配置
 
 dsyz 可以使用环境变量进行配置：

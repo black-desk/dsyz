@@ -24,6 +24,7 @@ install-bin:
 	$(INSTALL) -d "$(DESTDIR)$(bindir)"
 	$(INSTALL_PROGRAM) ./bin/dsyz "$(DESTDIR)$(bindir)"/dsyz
 	$(INSTALL_PROGRAM) ./bin/dsyz-deepin "$(DESTDIR)$(bindir)"/dsyz-deepin
+	$(INSTALL_PROGRAM) ./bin/dsyz-arch "$(DESTDIR)$(bindir)"/dsyz-arch
 
 .PHONY: install
 install: install-bin
