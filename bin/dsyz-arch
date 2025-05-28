@@ -53,22 +53,6 @@ function main() {
 	cat >"$DSYZ_ARCH_TEMPDIR/KERNEL_CONFIG_SCRIPT" <<EOF
 git checkout v$VERSION
 wget -O .config https://gitlab.archlinux.org/archlinux/packaging/packages/linux/-/raw/main/config?ref_type=heads
-make olddefconfig
-make kvm_guest.config
-
-./scripts/config --set-val CONFIG_KCOV y
-./scripts/config --set-val CONFIG_DEBUG_INFO_DWARF4 y
-./scripts/config --set-val CONFIG_KASAN y
-./scripts/config --set-val CONFIG_KASAN_INLINE y
-./scripts/config --set-val CONFIG_CONFIGFS_FS y
-./scripts/config --set-val CONFIG_SECURITYFS y
-./scripts/config --set-val CONFIG_CMDLINE_BOOL y
-./scripts/config --set-str CONFIG_CMDLINE "net.ifnames=0"
-
-./scripts/config --set-val CONFIG_ATA_PIIX y
-./scripts/config --set-val CONFIG_E1000 y
-
-make olddefconfig
 EOF
 	popd
 

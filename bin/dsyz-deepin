@@ -35,9 +35,6 @@ function main() {
 	log "[INFO] This is a wrapper script for dsyz to use the Deepin kernel repository."
 	log "[INFO] All arguments will be passed to dsyz."
 
-	KERNEL_CONFIG_SCRIPT="$(mktemp)"
-	trap 'rm -f "$KERNEL_CONFIG_SCRIPT"' EXIT
-
 	ARCH="$(uname -m)"
 	if [ "$ARCH" == "x86_64" ]; then
 		ARCH="x86"
@@ -45,28 +42,10 @@ function main() {
 		log "[ERROR] Unsupported architecture: $ARCH"
 	fi
 
-	cat >"$KERNEL_CONFIG_SCRIPT" <<EOF
-make deepin_${ARCH}_desktop_defconfig
-make kvm_guest.config
-
-./scripts/config --set-val CONFIG_KCOV y
-./scripts/config --set-val CONFIG_DEBUG_INFO_DWARF4 y
-./scripts/config --set-val CONFIG_KASAN y
-./scripts/config --set-val CONFIG_KASAN_INLINE y
-./scripts/config --set-val CONFIG_CONFIGFS_FS y
-./scripts/config --set-val CONFIG_SECURITYFS y
-./scripts/config --set-val CONFIG_CMDLINE_BOOL y
-./scripts/config --set-str CONFIG_CMDLINE "net.ifnames=0"
-
-./scripts/config --set-val CONFIG_BINFMT_MISC y
-./scripts/config --set-val CONFIG_E1000 y
-
-make olddefconfig
-EOF
 	DSYZ_KERNEL_REPO="${DSYZ_KERNEL_REPO:-https://github.com/deepin-community/kernel.git}"
 	env \
 		DSYZ_KERNEL_REPO="$DSYZ_KERNEL_REPO" \
-		DSYZ_KERNEL_CONFIG_SCRIPT="$KERNEL_CONFIG_SCRIPT" \
+		DSYZ_KERNEL_CONFIG="deepin_${ARCH}_desktop_defconfig" \
 		dsyz "$@"
 }
 

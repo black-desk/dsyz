@@ -30,12 +30,16 @@ Environment Variables:
   DSYZ_WORKDIR		- Working directory for all operations (default: current directory)
 
   DSYZ_SYZKALLER_REPO	- Git repository URL for syzkaller (default: https://github.com/google/syzkaller.git)
+  DSYZ_REBUILD_SYZKALLER	- Set to any non-empty value to force rebuild syzkaller
+
   DSYZ_KERNEL_REPO	- Git repository URL for Linux kernel (default: https://github.com/torvalds/linux.git)
   DSYZ_KERNEL_CONFIG_SCRIPT - Optional path to a custom kernel configuration script
+  DSYZ_KERNEL_CONFIG_FILE - Optional path to a custom kernel configuration file
+  DSYZ_KERNEL_CONFIG	- Kernel config target (default: defconfig)
   DSYZ_KERNEL_MAKE_JOBS	- Number of parallel jobs for kernel compilation (default: $(nproc))
   DSYZ_REBUILD_KERNEL	- Set to any non-empty value to force rebuild the kernel
-  DSYZ_RECREATE_IMAGE	- Set to any non-empty value to force recreate VM disk image
 
+  DSYZ_RECREATE_IMAGE	- Set to any non-empty value to force recreate VM disk image
   DSYZ_DISTRIBUTION	- Linux distribution for the VM image (default: bullseye)
   DSYZ_IMAGE		- Directory to store VM images (default: \$DSYZ_WORKDIR/image)
 
@@ -153,6 +157,10 @@ function main() {
 
 		fi
 
+		if [ -n "$DSYZ_KERNEL_CONFIG_FILE" ]; then
+			DSYZ_KERNEL_CONFIG_FILE="$(realpath -- "$DSYZ_KERNEL_CONFIG_FILE")"
+		fi
+
 		pushd "$DSYZ_WORKDIR"/linux
 
 		if [ -n "$DSYZ_KERNEL_CONFIG_SCRIPT" ]; then
@@ -160,21 +168,29 @@ function main() {
 				"$DSYZ_KERNEL_CONFIG_SCRIPT"
 			# shellcheck disable=SC1090
 			source "$DSYZ_KERNEL_CONFIG_SCRIPT"
+		elif [ -n "$DSYZ_KERNEL_CONFIG_FILE" ]; then
+			cp "$DSYZ_KERNEL_CONFIG_FILE" .config
 		else
-			make defconfig
-			make kvm_guest.config
-
-			./scripts/config --set-val CONFIG_KCOV y
-			./scripts/config --set-val CONFIG_DEBUG_INFO_DWARF4 y
-			./scripts/config --set-val CONFIG_KASAN y
-			./scripts/config --set-val CONFIG_KASAN_INLINE y
-			./scripts/config --set-val CONFIG_CONFIGFS_FS y
-			./scripts/config --set-val CONFIG_SECURITYFS y
-			./scripts/config --set-val CONFIG_CMDLINE_BOOL y
-			./scripts/config --set-str CONFIG_CMDLINE "net.ifnames=0"
-
-			make olddefconfig
+			make "${DSYZ_KERNEL_CONFIG:-defconfig}"
 		fi
+
+		make kvm_guest.config
+
+		# These options are required for booting the kernel in qemu
+		./scripts/config --set-val CONFIG_ATA_PIIX y
+		./scripts/config --set-val CONFIG_BINFMT_MISC y
+		./scripts/config --set-val CONFIG_E1000 y
+
+		./scripts/config --set-val CONFIG_KCOV y
+		./scripts/config --set-val CONFIG_DEBUG_INFO_DWARF4 y
+		./scripts/config --set-val CONFIG_KASAN y
+		./scripts/config --set-val CONFIG_KASAN_INLINE y
+		./scripts/config --set-val CONFIG_CONFIGFS_FS y
+		./scripts/config --set-val CONFIG_SECURITYFS y
+		./scripts/config --set-val CONFIG_CMDLINE_BOOL y
+		./scripts/config --set-str CONFIG_CMDLINE "net.ifnames=0"
+
+		make olddefconfig
 
 		log "[INFO] I will build the Linux kernel for fuzzing."
 

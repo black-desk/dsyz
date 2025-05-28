@@ -80,14 +80,35 @@ dsyz 可以使用环境变量进行配置：
 - `DSYZ_DEBUG` - 设置为任何非空值以在调试模式下运行 syzkaller
 - `DSYZ_WORKDIR` - 所有操作的工作目录（默认：当前目录）
 
-### 仓库设置
+### Syzkaller 编译设置
 
 - `DSYZ_SYZKALLER_REPO` - syzkaller 的 Git 仓库 URL（默认：<https://github.com/google/syzkaller.git>）
+- `DSYZ_REBUILD_SYZKALLER` - 设置为任何非空值以强制重新构建 syzkaller
+
+### 内核编译设置
+
 - `DSYZ_KERNEL_REPO` - Linux 内核的 Git 仓库 URL（默认：<https://github.com/torvalds/linux.git>）
 - `DSYZ_KERNEL_CONFIG_SCRIPT` - 可选的自定义内核配置脚本路径
+- `DSYZ_KERNEL_CONFIG_FILE` - 可选的自定义内核配置文件路径
+- `DSYZ_KERNEL_CONFIG` - 内核配置目标（默认：defconfig）
 - `DSYZ_KERNEL_MAKE_JOBS` - 内核编译的并行作业数量（默认：nproc）
 - `DSYZ_REBUILD_KERNEL` - 设置为任何非空值以强制重新构建内核
 - `DSYZ_RECREATE_IMAGE` - 设置为任何非空值以强制重新创建虚拟机磁盘镜像
+
+#### 内核配置选项优先级
+
+内核配置选项按以下优先级顺序处理：
+
+1. `DSYZ_KERNEL_CONFIG_SCRIPT` - 如果提供，这个脚本将在内核目录内被执行以设置配置。它具有最高优先级，可以执行复杂的配置任务。
+
+2. `DSYZ_KERNEL_CONFIG_FILE` - 如果没有提供脚本但设置了此变量，指定的文件将被复制为内核目录中的 `.config`。
+
+3. `DSYZ_KERNEL_CONFIG` - 如果既没有提供脚本也没有提供文件，这个值将用作 `make <config-value>`（例如 `make defconfig`）的目标。默认值为 `defconfig`。
+
+您可以参考包装脚本以获取示例：
+
+- `dsyz-arch` 使用 `DSYZ_KERNEL_CONFIG_SCRIPT` 创建一个脚本，该脚本检出最新的 Arch Linux 内核版本并下载其配置。
+- `dsyz-deepin` 使用 `DSYZ_KERNEL_CONFIG` 指定 Deepin 特定的 defconfig 目标。
 
 ### 虚拟机镜像设置
 
@@ -117,6 +138,12 @@ DSYZ_WORKDIR=/path/to/workdir dsyz
 
 # 使用自定义内核仓库并强制重新构建
 DSYZ_KERNEL_REPO=https://github.com/your/linux-fork.git DSYZ_REBUILD_KERNEL=1 dsyz
+
+# 使用自定义内核配置文件
+DSYZ_KERNEL_CONFIG_FILE=/path/to/your/kernel.config dsyz
+
+# 强制重新构建 syzkaller 并指定自定义 Go 路径
+DSYZ_REBUILD_SYZKALLER=1 DSYZ_GO=/usr/local/go/bin/go dsyz
 
 # 运行更多虚拟机和更大内存
 DSYZ_VM_COUNT=8 DSYZ_VM_MEMORY=4096 dsyz

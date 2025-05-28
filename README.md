@@ -72,14 +72,35 @@ dsyz can be configured using environment variables:
 - `DSYZ_DEBUG` - Set to any non-empty value to run syzkaller in debug mode
 - `DSYZ_WORKDIR` - Working directory for all operations (default: current directory)
 
-### Repository settings
+### Syzkaller build settings
 
 - `DSYZ_SYZKALLER_REPO` - Git repository URL for syzkaller (default: <https://github.com/google/syzkaller.git>)
+- `DSYZ_REBUILD_SYZKALLER` - Set to any non-empty value to force rebuild syzkaller
+
+### Kernel build settings
+
 - `DSYZ_KERNEL_REPO` - Git repository URL for Linux kernel (default: <https://github.com/torvalds/linux.git>)
 - `DSYZ_KERNEL_CONFIG_SCRIPT` - Optional path to a custom kernel configuration script
+- `DSYZ_KERNEL_CONFIG_FILE` - Optional path to a custom kernel configuration file
+- `DSYZ_KERNEL_CONFIG` - Kernel config target (default: defconfig)
 - `DSYZ_KERNEL_MAKE_JOBS` - Number of parallel jobs for kernel compilation (default: nproc)
 - `DSYZ_REBUILD_KERNEL` - Set to any non-empty value to force rebuild the kernel
 - `DSYZ_RECREATE_IMAGE` - Set to any non-empty value to force recreate VM disk image
+
+#### Kernel Configuration Options Priority
+
+The kernel configuration options are processed in the following priority order:
+
+1. `DSYZ_KERNEL_CONFIG_SCRIPT` - If provided, this script will be sourced inside the kernel directory to set up configuration. It has the highest priority and can perform complex configuration tasks.
+
+2. `DSYZ_KERNEL_CONFIG_FILE` - If no script is provided but this variable is set, the specified file will be copied as `.config` in the kernel directory.
+
+3. `DSYZ_KERNEL_CONFIG` - If neither script nor file is provided, this value will be used as the target for `make <config-value>` (e.g., `make defconfig`). The default is `defconfig`.
+
+You can refer to the wrapper scripts for examples:
+
+- `dsyz-arch` uses `DSYZ_KERNEL_CONFIG_SCRIPT` to create a script that checks out the latest Arch Linux kernel version and downloads its configuration.
+- `dsyz-deepin` uses `DSYZ_KERNEL_CONFIG` to specify the Deepin-specific defconfig target.
 
 ### VM image settings
 
@@ -109,6 +130,12 @@ DSYZ_WORKDIR=/path/to/workdir dsyz
 
 # Use a custom kernel repository and force rebuild
 DSYZ_KERNEL_REPO=https://github.com/your/linux-fork.git DSYZ_REBUILD_KERNEL=1 dsyz
+
+# Use a custom kernel configuration file
+DSYZ_KERNEL_CONFIG_FILE=/path/to/your/kernel.config dsyz
+
+# Force rebuild syzkaller using a custom Go path
+DSYZ_REBUILD_SYZKALLER=1 DSYZ_GO=/usr/local/go/bin/go dsyz
 
 # Run with more virtual machines and memory
 DSYZ_VM_COUNT=8 DSYZ_VM_MEMORY=4096 dsyz
