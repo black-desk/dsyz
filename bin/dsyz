@@ -180,6 +180,7 @@ function main() {
 		./scripts/config --set-val CONFIG_ATA_PIIX y
 		./scripts/config --set-val CONFIG_BINFMT_MISC y
 		./scripts/config --set-val CONFIG_E1000 y
+		./scripts/config --set-val CONFIG_EXT4_FS y
 
 		./scripts/config --set-val CONFIG_KCOV y
 		./scripts/config --set-val CONFIG_DEBUG_INFO_DWARF4 y
