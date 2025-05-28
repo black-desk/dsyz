@@ -55,11 +55,11 @@ This will:
 dsyz-deepin
 ```
 
-This is a wrapper script that configures DSYZ to use the Deepin kernel repository and applies specific configurations for fuzzing the Deepin kernel.
+This is a wrapper script that configures dsyz to use the Deepin kernel repository and applies specific configurations for fuzzing the Deepin kernel.
 
 ## Configuration
 
-DSYZ can be configured using environment variables:
+dsyz can be configured using environment variables:
 
 ### General settings
 
