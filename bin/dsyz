@@ -178,7 +178,7 @@ function main() {
 
 		log "[INFO] I will build the Linux kernel for fuzzing."
 
-		make -j"${DSYZ_KERNEL_MAKE_JOBS:-$(nproc)}"
+		make -j"${DSYZ_KERNEL_MAKE_JOBS:-$(nproc)}" bzImage
 
 		popd
 
