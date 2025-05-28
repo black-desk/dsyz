@@ -71,6 +71,7 @@ dsyz can be configured using environment variables:
 - `DSYZ_SYZKALLER_REPO` - Git repository URL for syzkaller (default: <https://github.com/google/syzkaller.git>)
 - `DSYZ_KERNEL_REPO` - Git repository URL for Linux kernel (default: <https://github.com/torvalds/linux.git>)
 - `DSYZ_KERNEL_CONFIG_SCRIPT` - Optional path to a custom kernel configuration script
+- `DSYZ_KERNEL_MAKE_JOBS` - Number of parallel jobs for kernel compilation (default: nproc)
 - `DSYZ_REBUILD_KERNEL` - Set to any non-empty value to force rebuild the kernel
 - `DSYZ_RECREATE_IMAGE` - Set to any non-empty value to force recreate VM disk image
 
