@@ -31,7 +31,7 @@ dsyz (Desktop SYZkaller) is a utility designed to simplify the setup and executi
 ### Install from source
 
 ```bash
-git clone https://github.com/yourusername/dsyz.git
+git clone https://github.com/black-desk/dsyz.git
 cd dsyz
 sudo make install
 ```
@@ -120,6 +120,7 @@ You can refer to the wrapper scripts for examples:
 ### Tool paths
 
 - `DSYZ_GIT` - Path to git executable (default: git)
+- `DSYZ_GO` - Path to Go executable (default: go)
 - `DSYZ_QEMU` - Path to qemu executable (default: qemu-system-$(uname -m))
 
 ## Example

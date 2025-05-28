@@ -52,6 +52,7 @@ Environment Variables:
   DSYZ_VM_MEMORY	- Memory in MB per virtual machine (default: 2048)
 
   DSYZ_GIT		- Path to git executable (default: git)
+  DSYZ_GO		- Path to Go executable (default: go)
   DSYZ_QEMU		- Path to qemu executable (default: qemu-system-$(uname -m))
 
 Usage:
