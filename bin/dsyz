@@ -178,11 +178,14 @@ function main() {
 		make kvm_guest.config
 
 		# These options are required for booting the kernel in qemu
+		# TODO:
+		# Maybe we can add these to kvm_guest.config.
 		./scripts/config --set-val CONFIG_ATA_PIIX y
 		./scripts/config --set-val CONFIG_BINFMT_MISC y
 		./scripts/config --set-val CONFIG_E1000 y
 		./scripts/config --set-val CONFIG_EXT4_FS y
 
+		# These options are required for syzkaller
 		./scripts/config --set-val CONFIG_KCOV y
 		./scripts/config --set-val CONFIG_DEBUG_INFO_DWARF4 y
 		./scripts/config --set-val CONFIG_KASAN y
