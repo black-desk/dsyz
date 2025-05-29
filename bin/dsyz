@@ -186,7 +186,9 @@ function main() {
 		./scripts/config --set-val CONFIG_EXT4_FS y
 
 		# These options are required for syzkaller
+		# https://github.com/google/syzkaller/blob/master/docs/linux/setup_ubuntu-host_qemu-vm_x86-64-kernel.md#enable-required-config-options
 		./scripts/config --set-val CONFIG_KCOV y
+		./scripts/config --set-val CONFIG_DEBUG_INFO y
 		./scripts/config --set-val CONFIG_DEBUG_INFO_DWARF4 y
 		./scripts/config --set-val CONFIG_KASAN y
 		./scripts/config --set-val CONFIG_KASAN_INLINE y
@@ -194,6 +196,47 @@ function main() {
 		./scripts/config --set-val CONFIG_SECURITYFS y
 		./scripts/config --set-val CONFIG_CMDLINE_BOOL y
 		./scripts/config --set-str CONFIG_CMDLINE "net.ifnames=0"
+
+		# https://github.com/google/syzkaller/blob/master/docs/linux/kernel_configs.md
+		./scripts/config --set-val CONFIG_KCOV_INSTRUMENT_ALL y
+		./scripts/config --set-val CONFIG_KCOV_ENABLE_COMPARISONS y
+		./scripts/config --set-val CONFIG_DEBUG_FS y
+		# ./scripts/config --set-val CONFIG_DEBUG_KMEMLEAK y
+		./scripts/config --set-val CONFIG_KALLSYMS y
+		./scripts/config --set-val CONFIG_KALLSYMS_ALL y
+		./scripts/config --set-val CONFIG_NAMESPACES y
+		./scripts/config --set-val CONFIG_UTS_NS y
+		./scripts/config --set-val CONFIG_IPC_NS y
+		./scripts/config --set-val CONFIG_PID_NS y
+		./scripts/config --set-val CONFIG_NET_NS y
+		./scripts/config --set-val CONFIG_CGROUP_PIDS y
+		./scripts/config --set-val CONFIG_MEMCG y
+		./scripts/config --set-val CONFIG_USER_NS y
+		./scripts/config --undefine CONFIG_RANDOMIZE_BASE
+		./scripts/config --set-val CONFIG_FAULT_INJECTION y
+		./scripts/config --set-val CONFIG_FAULT_INJECTION_DEBUG_FS y
+		./scripts/config --set-val CONFIG_FAULT_INJECTION_USERCOPY y
+		./scripts/config --set-val CONFIG_FAILSLAB y
+		./scripts/config --set-val CONFIG_FAIL_PAGE_ALLOC y
+		./scripts/config --set-val CONFIG_FAIL_MAKE_REQUEST y
+		./scripts/config --set-val CONFIG_FAIL_IO_TIMEOUT y
+		./scripts/config --set-val CONFIG_FAIL_FUTEX y
+		./scripts/config --set-val CONFIG_LOCKDEP y
+		./scripts/config --set-val CONFIG_PROVE_LOCKING y
+		./scripts/config --set-val CONFIG_DEBUG_ATOMIC_SLEEP y
+		./scripts/config --set-val CONFIG_PROVE_RCU y
+		./scripts/config --set-val CONFIG_DEBUG_VM y
+		./scripts/config --set-val CONFIG_REFCOUNT_FULL y
+		./scripts/config --set-val CONFIG_FORTIFY_SOURCE y
+		./scripts/config --set-val CONFIG_HARDENED_USERCOPY y
+		./scripts/config --set-val CONFIG_LOCKUP_DETECTOR y
+		./scripts/config --set-val CONFIG_SOFTLOCKUP_DETECTOR y
+		./scripts/config --set-val CONFIG_HARDLOCKUP_DETECTOR y
+		./scripts/config --set-val CONFIG_BOOTPARAM_HARDLOCKUP_PANIC y
+		./scripts/config --set-val CONFIG_DETECT_HUNG_TASK y
+		./scripts/config --set-val CONFIG_WQ_WATCHDOG y
+		./scripts/config --set-val CONFIG_DEFAULT_HUNG_TASK_TIMEOUT 140
+		./scripts/config --set-val CONFIG_RCU_CPU_STALL_TIMEOUT 100
 
 		make olddefconfig
 
