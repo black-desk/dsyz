@@ -51,6 +51,24 @@ This will:
 - Create a VM disk image (if not already done)
 - Start the syzkaller manager
 
+### Pass arguments to syz-manager
+
+You can pass additional arguments to syz-manager by using `--`:
+
+```bash
+dsyz -- -debug -cover
+```
+
+All arguments after `--` will be forwarded to syz-manager.
+
+For example, to run syz-manager in debug mode:
+
+```bash
+dsyz -- -debug
+```
+
+### Wrapper scripts
+
 ```bash
 dsyz-deepin
 ```
@@ -69,7 +87,6 @@ dsyz can be configured using environment variables:
 
 ### General settings
 
-- `DSYZ_DEBUG` - Set to any non-empty value to run syzkaller in debug mode
 - `DSYZ_WORKDIR` - Working directory for all operations (default: current directory)
 
 ### Syzkaller build settings

@@ -40,6 +40,33 @@ sudo make install
 
 ### 基本用法
 
+```bash
+dsyz
+```
+
+这将：
+
+- 克隆并构建 syzkaller（如果尚未完成）
+- 克隆并使用模糊测试配置构建 Linux 内核（如果尚未完成）
+- 创建虚拟机磁盘镜像（如果尚未完成）
+- 启动 syzkaller 管理器
+
+### 传递参数给 syz-manager
+
+你可以通过 `--` 向 syz-manager 传递额外参数，例如：
+
+```bash
+dsyz -- -debug -cover
+```
+
+所有 `--` 之后的参数都会被直接传递给 syz-manager。
+
+例如，调试模式运行 syz-manager：
+
+```bash
+dsyz -- -debug
+```
+
 <!-- 注意：中英文文档在基本用例上的代码示例不同。中文文档中使用了中国的镜像服务，以便中文用户能够更快速地下载依赖库。 -->
 
 ```bash
@@ -79,7 +106,6 @@ dsyz 可以使用环境变量进行配置：
 
 ### 一般设置
 
-- `DSYZ_DEBUG` - 设置为任何非空值以在调试模式下运行 syzkaller
 - `DSYZ_WORKDIR` - 所有操作的工作目录（默认：当前目录）
 
 ### Syzkaller 编译设置
