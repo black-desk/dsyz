@@ -13,14 +13,19 @@ FROM ubuntu:latest
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt update && apt upgrade && apt install -yq \
+    bison \
+    build-essential \
     ca-certificates \
+    flex \
+    gcc \
     git \
     golang-go \
+    libelf-dev \
+    libncurses-dev \
+    libssl-dev \
+    make \
     qemu-system-x86 \
     qemu-utils \
-    make \
-    gcc \
-    build-essential \
     --no-install-recommends && \
     apt clean && \
     apt dist-clean
