@@ -12,11 +12,12 @@ FROM ubuntu:latest
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt update && apt upgrade && apt install -yq \
+RUN apt update && apt upgrade && apt install -yq --no-install-recommends \
     bc \
     bison \
     build-essential \
     ca-certificates \
+    debootstrap \
     flex \
     gcc \
     git \
@@ -27,7 +28,8 @@ RUN apt update && apt upgrade && apt install -yq \
     make \
     qemu-system-x86 \
     qemu-utils \
-    --no-install-recommends && \
+    sudo \
+    && \
     apt clean && \
     apt dist-clean
 
