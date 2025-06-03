@@ -13,6 +13,7 @@ FROM ubuntu:latest
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt update && apt upgrade && apt install -yq \
+    ca-certificates \
     git \
     golang-go \
     qemu-system-x86 \
