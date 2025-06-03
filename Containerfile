@@ -13,6 +13,7 @@ FROM ubuntu:latest
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt update && apt upgrade && apt install -yq \
+    bc \
     bison \
     build-essential \
     ca-certificates \
