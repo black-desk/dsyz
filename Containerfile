@@ -2,6 +2,8 @@ FROM ubuntu:latest AS builder
 
 RUN mkdir -p /mnt/src
 
+RUN apt update && apt install -yq make
+
 COPY . /mnt/src
 
 RUN cd /mnt/src && make prefix=/opt/dsyz install
