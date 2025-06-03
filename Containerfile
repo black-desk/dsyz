@@ -26,6 +26,7 @@ RUN apt update && apt upgrade && apt install -yq --no-install-recommends \
     libncurses-dev \
     libssl-dev \
     make \
+    openssh-client \
     qemu-system-x86 \
     qemu-utils \
     sudo \
