@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1-labs
+
 FROM ubuntu:latest AS builder
 
 RUN mkdir -p /mnt/src
@@ -40,6 +42,6 @@ RUN mkdir -p /var/opt/lib/dsyz
 
 WORKDIR /var/opt/lib/dsyz
 
-RUN /opt/dsyz/bin/dsyz -p
+RUN --security=insecure /opt/dsyz/bin/dsyz -p
 
 ENTRYPOINT ["/opt/dsyz/bin/dsyz"]
