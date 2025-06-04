@@ -35,17 +35,21 @@ function main() {
 	log "[INFO] This is a wrapper script for dsyz to use the Deepin kernel repository."
 	log "[INFO] All arguments will be passed to dsyz."
 
-	ARCH="$(uname -m)"
-	if [ "$ARCH" == "x86_64" ]; then
-		ARCH="x86"
-	else
-		log "[ERROR] Unsupported architecture: $ARCH"
-	fi
+	# NOTE:
+	# Copy from kernel source scripts/subarch.include
+	SUBARCH="$(shell uname -m | sed -e s/i.86/x86/ -e s/x86_64/x86/ \
+		-e s/sun4u/sparc64/ \
+		-e s/arm.*/arm/ -e s/sa110/arm/ \
+		-e s/s390x/s390/ \
+		-e s/ppc.*/powerpc/ -e s/mips.*/mips/ \
+		-e s/sh[234].*/sh/ -e s/aarch64.*/arm64/ \
+		-e s/riscv.*/riscv/ -e s/loongarch.*/loongarch/)"
+
 
 	DSYZ_KERNEL_REPO="${DSYZ_KERNEL_REPO:-https://github.com/deepin-community/kernel.git}"
 	env \
 		DSYZ_KERNEL_REPO="$DSYZ_KERNEL_REPO" \
-		DSYZ_KERNEL_CONFIG="deepin_${ARCH}_desktop_defconfig" \
+		DSYZ_KERNEL_CONFIG="deepin_${SUBARCH}_desktop_defconfig" \
 		dsyz "$@"
 }
 
