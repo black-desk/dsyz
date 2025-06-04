@@ -32,6 +32,7 @@ RUN apt update && apt upgrade && apt install -yq --no-install-recommends \
     qemu-system-x86 \
     qemu-utils \
     sudo \
+    zstd \
     && \
     apt clean && \
     apt dist-clean
