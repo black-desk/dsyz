@@ -42,6 +42,4 @@ RUN mkdir -p /var/opt/lib/dsyz
 
 WORKDIR /var/opt/lib/dsyz
 
-RUN --security=insecure /opt/dsyz/bin/dsyz -p
-
 ENTRYPOINT ["/opt/dsyz/bin/dsyz"]

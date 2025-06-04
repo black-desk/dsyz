@@ -60,7 +60,6 @@ Usage:
 
 Options:
   -h	Show this screen.
-  -p	Do not run syz-manager, only prepare the environment.
   --	Pass additional arguments to syzy-manager."
 
 # This function log messages to stderr works like printf
@@ -78,9 +77,6 @@ function log() {
 function main() {
 	while getopts ':hp' option; do
 		case "$option" in
-		p)
-			DSYZ_PREPARE=1
-			;;
 		h)
 			echo "$USAGE"
 			exit
@@ -313,10 +309,6 @@ EOF
 
 	mkdir -p "$DSYZ_WORKDIR/workdir"
 
-	if [ -n "$DSYZ_PREPARE" ]; then
-		exit 0
-	fi
-	
 	"$DSYZ_WORKDIR/syzkaller/bin/syz-manager" -config="$DSYZ_WORKDIR/syz-manager-config.json" "$@"
 }
 
