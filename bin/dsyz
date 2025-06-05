@@ -200,6 +200,7 @@ function main() {
 		./scripts/config --set-val CONFIG_KCOV y
 		./scripts/config --set-val CONFIG_DEBUG_INFO y
 		./scripts/config --set-val CONFIG_DEBUG_INFO_DWARF4 y
+		./scripts/config --set-val CONFIG_DEBUG_INFO_DWARF5 n
 		./scripts/config --set-val CONFIG_KASAN y
 		./scripts/config --set-val CONFIG_KASAN_INLINE y
 		./scripts/config --set-val CONFIG_CONFIGFS_FS y
