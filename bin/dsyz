@@ -253,6 +253,7 @@ function main() {
 		./scripts/config --set-val CONFIG_TUN y
 		./scripts/config --set-val CONFIG_USB_GADGET y
 		./scripts/config --set-val CONFIG_USB_RAW_GADGET y
+		./scripts/config --set-val CONFIG_USB_DUMMY_HCD y
 		./scripts/config --set-val CONFIG_RFKILL y
 		./scripts/config --set-val CONFIG_BT y
 		./scripts/config --set-val CONFIG_BT_HCIVHCI y
