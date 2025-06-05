@@ -269,7 +269,7 @@ function main() {
 
 	fi
 
-	log "[INFO] Kernel bzImage is available at $DSYZ_WORKDIR/linux/arch/$(uname -m)/boot/bzImage"
+	log "[INFO] Kernel bzImage is available at $DSYZ_WORKDIR/linux/arch/$SUBARCH/boot/bzImage"
 
 	DSYZ_DISTRIBUTION="${DSYZ_DISTRIBUTION:-"bullseye"}"
 	DSYZ_IMAGE="${DSYZ_IMAGE:-"$DSYZ_WORKDIR"/image}"
