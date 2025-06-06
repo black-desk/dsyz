@@ -213,7 +213,8 @@ function main() {
 		./scripts/config --set-val CONFIG_KCOV_INSTRUMENT_ALL y
 		./scripts/config --set-val CONFIG_KCOV_ENABLE_COMPARISONS y
 		./scripts/config --set-val CONFIG_DEBUG_FS y
-		./scripts/config --set-val CONFIG_DEBUG_KMEMLEAK y
+		# FIXME: CONFIG_DEBUG_KMEMLEAK seems break syzkaller fuzzing
+		# ./scripts/config --set-val CONFIG_DEBUG_KMEMLEAK y
 		./scripts/config --set-val CONFIG_KALLSYMS y
 		./scripts/config --set-val CONFIG_KALLSYMS_ALL y
 		./scripts/config --set-val CONFIG_NAMESPACES y
