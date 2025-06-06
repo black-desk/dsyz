@@ -75,7 +75,7 @@ function log() {
 }
 
 function main() {
-	while getopts ':hp' option; do
+	while getopts ':h' option; do
 		case "$option" in
 		h)
 			echo "$USAGE"
