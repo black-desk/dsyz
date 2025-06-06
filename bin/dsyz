@@ -111,8 +111,23 @@ function main() {
 
 	log "[INFO] Syzkaller source is available at $DSYZ_WORKDIR/syzkaller"
 
+	if [ -n "$DSYZ_UPDATE_SYZKALLER" ]; then
+		DSYZ_REBUILD_SYZKALLER=1
+	fi
+
 	if [ -n "$DSYZ_REBUILD_SYZKALLER" ] || ! [ -d "$DSYZ_WORKDIR/syzkaller/bin" ]; then
 		pushd "$DSYZ_WORKDIR"/syzkaller
+
+		DSYZ_GIT="${DSYZ_GIT:-git}"
+		if ! command -v "$DSYZ_GIT" &>/dev/null; then
+			log "[ERROR] git is not installed. Please install git first."
+			exit 1
+		fi
+
+		if [ -n "$DSYZ_UPDATE_SYZKALLER" ]; then
+			log "[INFO] Updating syzkaller to the latest version."
+			"$DSYZ_GIT" pull --ff-only || true
+		fi
 
 		DSYZ_GO="${DSYZ_GO:-go}"
 		if ! command -v "$DSYZ_GO" &>/dev/null; then
@@ -154,6 +169,10 @@ function main() {
 		-e s/sh[234].*/sh/ -e s/aarch64.*/arm64/ \
 		-e s/riscv.*/riscv/ -e s/loongarch.*/loongarch/)"
 
+	if [ -n "$DSYZ_UPDATE_KERNEL" ]; then
+		DSYZ_REBUILD_KERNEL=1
+	fi
+
 	if [ -n "$DSYZ_REBUILD_KERNEL" ] || ! [ -f "$DSYZ_WORKDIR/linux/arch/$SUBARCH/boot/bzImage" ]; then
 		log "[INFO] I will configure the Linux kernel for syzkaller fuzzing."
 
@@ -173,6 +192,18 @@ function main() {
 		fi
 
 		pushd "$DSYZ_WORKDIR"/linux
+
+		if [ -n "$DSYZ_UPDATE_KERNEL" ]; then
+			log "[INFO] Updating Linux kernel source."
+
+			DSYZ_GIT="${DSYZ_GIT:-git}"
+			if ! command -v "$DSYZ_GIT" &>/dev/null; then
+				log "[ERROR] git is not installed. Please install git first."
+				exit 1
+			fi
+
+			"$DSYZ_GIT" pull --ff-only || true
+		fi
 
 		if [ -n "$DSYZ_KERNEL_CONFIG_SCRIPT" ]; then
 			log "[INFO] Using \"%s\" to configure the kernel." \
