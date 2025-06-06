@@ -35,4 +35,7 @@ RUN mkdir -p /var/opt/lib/dsyz
 
 WORKDIR /var/opt/lib/dsyz
 
+# Enable update-related environment variables for container builds
+ENV DSYZ_UPDATE_SYZKALLER=1 DSYZ_UPDATE_KERNEL=1
+
 ENTRYPOINT ["/opt/dsyz/bin/dsyz"]
