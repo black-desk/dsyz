@@ -93,6 +93,7 @@ dsyz can be configured using environment variables:
 
 - `DSYZ_SYZKALLER_REPO` - Git repository URL for syzkaller (default: <https://github.com/google/syzkaller.git>)
 - `DSYZ_REBUILD_SYZKALLER` - Set to any non-empty value to force rebuild syzkaller
+- `DSYZ_UPDATE_SYZKALLER` - Set to any non-empty value to update syzkaller (implies DSYZ_REBUILD_SYZKALLER)
 
 ### Kernel build settings
 
@@ -102,6 +103,7 @@ dsyz can be configured using environment variables:
 - `DSYZ_KERNEL_CONFIG` - Kernel config target (default: defconfig)
 - `DSYZ_KERNEL_MAKE_JOBS` - Number of parallel jobs for kernel compilation (default: nproc)
 - `DSYZ_REBUILD_KERNEL` - Set to any non-empty value to force rebuild the kernel
+- `DSYZ_UPDATE_KERNEL` - Set to any non-empty value to update kernel source (implies DSYZ_REBUILD_KERNEL)
 - `DSYZ_RECREATE_IMAGE` - Set to any non-empty value to force recreate VM disk image
 
 #### Kernel Configuration Options Priority

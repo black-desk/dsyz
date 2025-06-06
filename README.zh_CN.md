@@ -112,6 +112,7 @@ dsyz 可以使用环境变量进行配置：
 
 - `DSYZ_SYZKALLER_REPO` - syzkaller 的 Git 仓库 URL（默认：<https://github.com/google/syzkaller.git>）
 - `DSYZ_REBUILD_SYZKALLER` - 设置为任何非空值以强制重新构建 syzkaller
+- `DSYZ_UPDATE_SYZKALLER` - 设置为任何非空值以更新 syzkaller（隐含 DSYZ_REBUILD_SYZKALLER）
 
 ### 内核编译设置
 
@@ -121,6 +122,7 @@ dsyz 可以使用环境变量进行配置：
 - `DSYZ_KERNEL_CONFIG` - 内核配置目标（默认：defconfig）
 - `DSYZ_KERNEL_MAKE_JOBS` - 内核编译的并行作业数量（默认：nproc）
 - `DSYZ_REBUILD_KERNEL` - 设置为任何非空值以强制重新构建内核
+- `DSYZ_UPDATE_KERNEL` - 设置为任何非空值以更新内核源码（隐含 DSYZ_REBUILD_KERNEL）
 - `DSYZ_RECREATE_IMAGE` - 设置为任何非空值以强制重新创建虚拟机磁盘镜像
 
 #### 内核配置选项优先级

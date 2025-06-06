@@ -26,41 +26,46 @@ Description:
   Tool to setup and run syzkaller for fuzzing Desktop Linux kernel.
 
 Environment Variables:
-  DSYZ_WORKDIR		- Working directory for all operations (default: current directory)
+  DSYZ_WORKDIR           - Working directory for all operations (default: current directory)
 
-  DSYZ_SYZKALLER_REPO	- Git repository URL for syzkaller (default: https://github.com/google/syzkaller.git)
-  DSYZ_REBUILD_SYZKALLER	- Set to any non-empty value to force rebuild syzkaller
+  DSYZ_SYZKALLER_REPO    - Git repository URL for syzkaller (default: https://github.com/google/syzkaller.git)
+  DSYZ_REBUILD_SYZKALLER - Set to any non-empty value to force rebuild syzkaller
+  DSYZ_UPDATE_SYZKALLER  - Set to any non-empty value to update syzkaller (implies DSYZ_REBUILD_SYZKALLER)
 
-  DSYZ_KERNEL_REPO	- Git repository URL for Linux kernel (default: https://github.com/torvalds/linux.git)
-  DSYZ_KERNEL_CONFIG_SCRIPT - Optional path to a custom kernel configuration script
-  DSYZ_KERNEL_CONFIG_FILE - Optional path to a custom kernel configuration file
-  DSYZ_KERNEL_CONFIG	- Kernel config target (default: defconfig)
-  DSYZ_KERNEL_MAKE_JOBS	- Number of parallel jobs for kernel compilation (default: $(nproc))
-  DSYZ_REBUILD_KERNEL	- Set to any non-empty value to force rebuild the kernel
+  DSYZ_KERNEL_REPO           - Git repository URL for Linux kernel (default: https://github.com/torvalds/linux.git)
+  DSYZ_KERNEL_CONFIG_SCRIPT  - Optional path to a custom kernel configuration script (highest priority)
+  DSYZ_KERNEL_CONFIG_FILE    - Optional path to a custom kernel configuration file (second priority)
+  DSYZ_KERNEL_CONFIG         - Kernel config target (default: defconfig, lowest priority)
+  DSYZ_KERNEL_MAKE_JOBS      - Number of parallel jobs for kernel compilation (default: $(nproc))
+  DSYZ_REBUILD_KERNEL        - Set to any non-empty value to force rebuild the kernel
+  DSYZ_UPDATE_KERNEL         - Set to any non-empty value to update kernel source (implies DSYZ_REBUILD_KERNEL)
 
-  DSYZ_RECREATE_IMAGE	- Set to any non-empty value to force recreate VM disk image
-  DSYZ_DISTRIBUTION	- Linux distribution for the VM image (default: bullseye)
-  DSYZ_IMAGE		- Directory to store VM images (default: \$DSYZ_WORKDIR/image)
+  DSYZ_RECREATE_IMAGE    - Set to any non-empty value to force recreate VM disk image
+  DSYZ_DISTRIBUTION      - Linux distribution for the VM image (default: bullseye)
+  DSYZ_IMAGE             - Directory to store VM images (default: $DSYZ_WORKDIR/image)
 
-  DSYZ_LISTEN		- IP address to listen on for HTTP interface (default: 127.0.0.1)
-  DSYZ_PORT		- Port to listen on for HTTP interface (default: 56741)
-  DSYZ_TARGET		- Target architecture for syzkaller (default: linux/amd64)
-  DSYZ_PROCS		- Number of parallel processes for syzkaller (default: 8)
-  DSYZ_VM_COUNT		- Number of virtual machines to run (default: 4)
-  DSYZ_VM_CPU		- Number of CPU cores per virtual machine (default: 2)
-  DSYZ_VM_MEMORY	- Memory in MB per virtual machine (default: 2048)
+  DSYZ_LISTEN            - IP address to listen on for HTTP interface (default: 127.0.0.1)
+  DSYZ_PORT              - Port to listen on for HTTP interface (default: 56741)
+  DSYZ_TARGET            - Target architecture for syzkaller (default: linux/amd64)
+  DSYZ_PROCS             - Number of parallel processes for syzkaller (default: 8)
+  DSYZ_VM_COUNT          - Number of virtual machines to run (default: 4)
+  DSYZ_VM_CPU            - Number of CPU cores per virtual machine (default: 2)
+  DSYZ_VM_MEMORY         - Memory in MB per virtual machine (default: 2048)
 
-  DSYZ_GIT		- Path to git executable (default: git)
-  DSYZ_GO		- Path to Go executable (default: go)
-  DSYZ_QEMU		- Path to qemu executable (default: qemu-system-$(uname -m))
+  DSYZ_GIT               - Path to git executable (default: git)
+  DSYZ_GO                - Path to Go executable (default: go)
+  DSYZ_QEMU              - Path to qemu executable (default: qemu-system-$(uname -m))
+
+Notes:
+  For detailed environment variable descriptions, usage priority, and more examples, please refer to the README.md.
 
 Usage:
   $CURRENT_SOURCE_FILE_NAME -h
-  $CURRENT_SOURCE_FILE_NAME
+  $CURRENT_SOURCE_FILE_NAME [-- ...]
 
 Options:
-  -h	Show this screen.
-  --	Pass additional arguments to syzy-manager."
+  -h   Show this screen.
+  --   Pass additional arguments to syz-manager."
 
 # This function log messages to stderr works like printf
 # with a prefix of the current script name.
