@@ -139,8 +139,11 @@ function main() {
 			log "[ERROR] go is not installed. Please install go first."
 			exit 1
 		fi
+		
+		if [ -z "$DSYZ_REBUILD_SYZKALLER" ] || [ ! -x bin/syz-manager ]; then
+			make
+		fi
 
-		make
 		popd
 	fi
 
